@@ -1,0 +1,10 @@
+name = "LibNanoVG"
+uuid = "7e2db94e-98cb-4b2e-907e-9710ad85db91"
+authors = ["Jorge Pereira <jorge.brito.xyz@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
+ColorTypes = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
+GLEW_jll = "bde7f898-03f7-559e-8810-194d950ce600"
+NanoVG_jll = "38a0872c-fafd-5507-99b7-5cae04c321c8"
