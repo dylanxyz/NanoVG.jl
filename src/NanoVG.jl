@@ -2,6 +2,7 @@ module NanoVG
 
 using ColorTypes
 using LibNanoVG
+using ModernGL
 
 using Base: @kwdef
 
@@ -36,6 +37,28 @@ export skewy
 export scale
 export transformation
 
+export save
+export restore
+export resetsyle
+export scissor
+export clip
+export antialias
+export strokecolor
+export fillcolor
+export background
+export pattern
+export miterlimit
+export strokewidth
+export linecap
+export linejoin
+export setalpha
+export fontface
+export fontsize
+export fontblur
+export lineheight
+export textspacing
+export textalign
+
 const Vect = AbstractVector{<:Real}
 const Maybe{T} = Union{T, Nothing}
 const Pointer{T} = Union{AbstractArray{T}, Ptr{T}}
@@ -50,6 +73,7 @@ include("image.jl")
 include("font.jl")
 include("gradient.jl")
 include("transform.jl")
+include("style.jl")
 
 @enum NvgRenderer begin
     GL2   # OpenGL 2 implementation
