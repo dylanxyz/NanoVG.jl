@@ -39,7 +39,7 @@ function loadfont(name::AbstractString, filename::AbstractString)
     return Font(id, name)
 end
 
-function loadfont(name::AbstractString, filename::AbstractString; index)
+function loadfont(name::AbstractString, filename::AbstractString, index::Integer)
     id = nvgCreateFontAtIndex(@vg, name, filename, index)
     @assert id != -1 "Failed to load font '$name' from $filename at index $index"
     return Font(id, name)
