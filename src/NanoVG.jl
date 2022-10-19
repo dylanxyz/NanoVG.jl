@@ -28,6 +28,14 @@ export LinearGradient
 export BoxGradient
 export RadialGradient
 
+export transform
+export translate
+export rotate
+export skewx
+export skewy
+export scale
+export transformation
+
 const Vect = AbstractVector{<:Real}
 const Maybe{T} = Union{T, Nothing}
 const Pointer{T} = Union{AbstractArray{T}, Ptr{T}}
@@ -41,6 +49,7 @@ include("utils.jl")
 include("image.jl")
 include("font.jl")
 include("gradient.jl")
+include("transform.jl")
 
 @enum NvgRenderer begin
     GL2   # OpenGL 2 implementation
