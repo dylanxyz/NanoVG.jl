@@ -33,6 +33,10 @@ mutable struct TextBounds
     TextBounds(args...) = new(args...)
 end
 
+function Base.unsafe_convert(::Type{Ptr{Float32}}, it::TextBounds)
+    return convert(Ptr{Float32}, pointer_from_objref(it))
+end
+
 function loadfont(name::AbstractString, filename::AbstractString)
     id = nvgCreateFont(@vg, name, filename)
     @assert id != -1 "Failed to load font '$name' from $filename"
