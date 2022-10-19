@@ -3,12 +3,26 @@ struct Font
     name::String
 end
 
+"""
+Represents the vertical metrics based on the current text style.
+"""
 struct TextMetrics
     ascender  ::Float32
     descender ::Float32
     lineheight::Float32
 end
 
+"""
+Represents a text row that is used by [`breaklines`](@ref).
+
+# Fields
+
++ `text` is the text of the row.
++ `width` is the logical width of the row.
++ `xmin` and `xmax` represents the bounds of the row.
+
+Logical `width` and bounds can differ because of kerning and some parts over extending.
+"""
 struct TextRow
     text ::String
     width::Float32
@@ -16,6 +30,15 @@ struct TextRow
     xmax ::Float32
 end
 
+"""
+Represents a glyph position used by [`glyphpos`](@ref).
+
+# Fields
+
++ `char` is the actual glyph character as a string.
++ `x` is the x-coordinate of the logical glyph position.
++ `xmin` and `xmax` are the bounds of the glyph shape.
+"""
 struct GlyphPosition
     char::String
     x   ::Float32
@@ -23,6 +46,17 @@ struct GlyphPosition
     xmax::Float32
 end
 
+"""
+Represents the bounding box of a piece of text.
+
+# Fields
+
++ `xmin` is the x coordinate of the top-left corner of the bounding box.
++ `ymin` is the y coordinate of the top-left corner of the bounding box.
++ `xmax` is the x coordinate of the bottom-right corner of the bounding box.
++ `ymax` is the y coordinate of the bottom-right corner of the bounding box.
++ `next` is the position where the next character should be drawn.
+"""
 mutable struct TextBounds
     xmin::Float32
     ymin::Float32
@@ -83,6 +117,12 @@ function loadfont(name::AbstractString, data::Pointer{UInt8}, index::Integer; fr
     return Font(id, name)
 end
 
+"""
+    fallbackfont(base::Font, fallback::Font)
+    fallbackfont(base::AbstractString, fallback::AbstractString)
+
+Adds a fallback font.
+"""
 function fallbackfont(base::Font, fallback::Font)
     nvgAddFallbackFontId(@vg, base.id, fallback.id)
 end
@@ -91,9 +131,22 @@ function fallbackfont(base::AbstractString, fallback::AbstractString)
     nvgAddFallbackFont(@vg, base, fallback)
 end
 
+"""
+    resetfonts(base::Font)
+    resetfonts(base::AbstractString)
+
+Reset fallback fonts.
+"""
 resetfonts(base::Font) = nvgResetFallbackFontsId(@vg, base.id)
 resetfonts(base::AbstractString) = nvgResetFallbackFontsId(@vg, base)
 
+"""
+    findfont(name) -> Font
+
+Find a font by `name` and returns it, or throws an error if no font is found.
+
+See also [`loadfont`](@ref).
+"""
 function findfont(name::AbstractString)
     id = nvgFindFont(@vg, string(name))
     @assert id != -1 "Could not find font $name"
@@ -102,6 +155,16 @@ end
 
 Base.getindex(bounds::TextBounds, i::Integer) = getfield(bounds, i)
 
+"""
+    textbounds(text, x, y) -> TextBounds
+    textbounds(text, x, y, width) -> TextBounds
+
+Returns the bounding box of `text` at position `(x, y)`.
+
+The return value is a [`TextBounds`](@ref) object.
+
+A optional `width` parameter can be used to constrain the text in a text box.
+"""
 function textbounds(text::AbstractString, x::Real, y::Real)
     bounds = TextBounds()
     nextpos = nvgTextBounds(@vg, x, y, text, C_NULL, bounds)
@@ -109,13 +172,25 @@ function textbounds(text::AbstractString, x::Real, y::Real)
     return bounds
 end
 
-function textbounds(text::AbstractString, x::Real, y::Real, rowWidth::Real)
+function textbounds(text::AbstractString, x::Real, y::Real, width::Real)
     bounds = TextBounds()
-    nextpos = nvgTextBoxBounds(@vg, x, y, rowWidth, text, C_NULL, bounds)
+    nextpos = nvgTextBoxBounds(@vg, x, y, width, text, C_NULL, bounds)
     bounds.next = isnothing(nextpos) ? 0 : nextpos
     return bounds
 end
 
+"""
+    breaklines(f, text, width, [maxrows])
+
+Breaks the specified text into lines, then call `f` for each line.
+
+The `f` function accepts 2 arguments: a [`TextRow`](@ref) and the current line position.
+
+White space is stripped at the beginning of the rows, the text is split at word boundaries
+or when new-line characters are encountered.
+
+Words longer than the max width are slit at nearest character (i.e. no hyphenation).
+"""
 function breaklines(f::Function, text::AbstractString, width::Real, maxrows::Integer)
     rows = Vector{NVGtextRow}(undef, maxrows)
     start = text
@@ -135,10 +210,15 @@ function breaklines(f::Function, text::AbstractString, width::Real, maxrows::Int
     end
 end
 
-function breaklines(callback::Function, text::AbstractString, width::Real)
-    breaklines(callback, text, width, count(==('\n'), text))
+function breaklines(f::Function, text::AbstractString, width::Real)
+    breaklines(f, text, width, count(==('\n'), text))
 end
 
+"""
+    glyphpos(text, x, y) -> Vector{GlyphPosition}
+
+Calculates the glyph `x` positions of the specified `text`.
+"""
 function glyphpos(text::AbstractString, x::Real, y::Real)
     maxPositions = length(text)
     positions = Vector{NVGglyphPosition}(undef, maxPositions)
@@ -154,6 +234,15 @@ function glyphpos(text::AbstractString, x::Real, y::Real)
     return result
 end
 
+"""
+    textmetrics() -> TextMetrics
+
+Returns the vertical metrics based on the current text style.
+
+Measured values are returned in local coordinate space.
+
+See also [`TextMetrics`](@ref).
+"""
 function textmetrics()
     ascender = Ref{Cfloat}()
     descender = Ref{Cfloat}()
