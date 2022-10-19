@@ -66,3 +66,6 @@ rgba(s::Real, a::Real=255) = nvgRGBA(s, s, s, a)
 
 hsl(hue::Real, s::Real, l::Real) = nvgHSL(hue / 360, s, l)
 hsla(hue::Real, s::Real, l::Real, alpha::Real=255) = nvgHSLA(hue / 360, s, l, alpha)
+
+rgba(color::RGBA{Float32}) = color
+rgba(color::ColorLike) = parse(RGBA{Float32}, color)
