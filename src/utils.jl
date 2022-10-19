@@ -61,8 +61,9 @@ end
 rgb(r::Real, g::Real, b::Real) = nvgRGB(r, g, b)
 rgb(s::Real) = nvgRGB(s, s, s)
 
-rgba(r::Real, g::Real, b::Real, a::Real=255) = nvgRGBA(r, g, b, a)
-rgba(s::Real, a::Real=255) = nvgRGBA(s, s, s, a)
+rgba(r::Real, g::Real, b::Real, a::Real) = nvgRGBA(r, g, b, a)
+rgba(s::Real, alpha::Real) = nvgRGBA(s, s, s, alpha)
+rgba(s::Real) = nvgRGBA(s, s, s, s)
 
 hsl(hue::Real, s::Real, l::Real) = nvgHSL(hue / 360, s, l)
 hsla(hue::Real, s::Real, l::Real, alpha::Real=255) = nvgHSLA(hue / 360, s, l, alpha)
