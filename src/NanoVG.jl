@@ -15,6 +15,7 @@ export rgb
 export rgba
 export hsl
 export hsla
+export delete
 
 export loadfont
 export fallbackfont
