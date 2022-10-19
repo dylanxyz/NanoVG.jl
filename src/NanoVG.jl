@@ -28,11 +28,17 @@ export LinearGradient
 export BoxGradient
 export RadialGradient
 
+const Vect = AbstractVector{<:Real}
+const Maybe{T} = Union{T, Nothing}
+const Pointer{T} = Union{AbstractArray{T}, Ptr{T}}
 const ColorLike = Union{Colorant, AbstractString}
 
 var"@vg"(::Any, ::Any) = :( context().handle )
 
+function delete end
+
 include("utils.jl")
+include("image.jl")
 include("font.jl")
 include("gradient.jl")
 
