@@ -9,8 +9,8 @@ import ..@asset_str
 
 const settings = (
     title  = "NanoVG Demo",
-    width  = 1280,
-    height = 760,
+    width  = 1000,
+    height = 600,
     vsync  = false,
 )
 
