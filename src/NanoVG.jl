@@ -24,10 +24,17 @@ export breaklines
 export glyphpos
 export textmetrics
 
+export LinearGradient
+export BoxGradient
+export RadialGradient
+
+const ColorLike = Union{Colorant, AbstractString}
+
 var"@vg"(::Any, ::Any) = :( context().handle )
 
 include("utils.jl")
 include("font.jl")
+include("gradient.jl")
 
 @enum NvgRenderer begin
     GL2   # OpenGL 2 implementation
