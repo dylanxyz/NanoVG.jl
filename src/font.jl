@@ -37,6 +37,28 @@ function Base.unsafe_convert(::Type{Ptr{Float32}}, it::TextBounds)
     return convert(Ptr{Float32}, pointer_from_objref(it))
 end
 
+"""
+    loadfont(name, filename[, index]) -> Font
+    loadfont(name, data[, index]) -> Font
+
+Loads a font from a `.ttf/.ttc` at `filename` or from memory.
+
+`name` is an arbritary name that can be used later to select this font.
+
+`index` can be used to specifie which font face to load.
+
+# Example
+
+First whe load the font:
+
+    loadfont("My Font", "path/to/myfont.ttf")
+
+Then we can select it with:
+
+    fontface("My Font")
+
+See also [`fontface`](@ref) and [`findfont`](@ref).
+"""
 function loadfont(name::AbstractString, filename::AbstractString)
     id = nvgCreateFont(@vg, name, filename)
     @assert id != -1 "Failed to load font '$name' from $filename"
@@ -46,6 +68,18 @@ end
 function loadfont(name::AbstractString, filename::AbstractString, index::Integer)
     id = nvgCreateFontAtIndex(@vg, name, filename, index)
     @assert id != -1 "Failed to load font '$name' from $filename at index $index"
+    return Font(id, name)
+end
+
+function loadfont(name::AbstractString, data::Pointer{UInt8}; free=false)
+    id = nvgCreateFontMem(@vg, name, data, length(data), free)
+    @assert id != -1 "Failed to load font $name"
+    return Font(id, name)
+end
+
+function loadfont(name::AbstractString, data::Pointer{UInt8}, index::Integer; free=false)
+    id = nvgCreateFontMemAtIndex(@vg, name, data, length(data), free, index)
+    @assert id != -1 "Failed to load font $name at index $index"
     return Font(id, name)
 end
 
