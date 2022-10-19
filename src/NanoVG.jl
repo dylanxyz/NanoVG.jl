@@ -95,6 +95,7 @@ include("font.jl")
 include("gradient.jl")
 include("transform.jl")
 include("style.jl")
+include("drawing.jl")
 
 @enum NvgRenderer begin
     GL2   # OpenGL 2 implementation
@@ -189,5 +190,35 @@ cancel() = nvgCancelFrame(@vg)
 Ends drawing flushing remaining render state.
 """
 render() = nvgEndFrame(@vg)
+
+function example(example::String)
+    dir = readdir(joinpath(@__DIR__, "..", "examples"); join=true)
+    dir = normpath.(dir)
+    found = false
+    for path in dir
+        # ignore other files
+        isfile(path) && continue
+        # ignore assets folder
+        basename(path) == "assets" && continue
+
+        if basename(path) == example
+            @info "Running example $example"
+            file = joinpath(path, example * ".jl")
+            found = true
+            run(`julia -q \
+                --startup-file=no --project=$(path) \
+                -e 'import Pkg; Pkg.instantiate(); include(ARGS[1])' $file`)
+            break
+        end
+    end
+
+    if !found
+        examples = dir
+        examples = filter(isdir, examples)
+        examples = map(basename, examples)
+        examples = filter(!=("assets"), examples)
+        @error "Example \"$example\" not found. Valid examples are: $(repr(examples))"
+    end
+end
 
 end # module
