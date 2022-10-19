@@ -1,8 +1,10 @@
 using Raylib
 using NanoVG
+using Printf
 
 include("../utils.jl")
 include("../demo.jl")
+include("../perf.jl")
 
 const settings = Demo.settings
 
@@ -20,6 +22,8 @@ function main()
 
     Demo.setup()
 
+    fpsGraph = PerfGraph(GRAPH_RENDER_FPS, "Frame Time")
+    cpuGraph = PerfGraph(GRAPH_RENDER_MS,  "CPU Time")
     time = TimeInfo()
 
     while !Raylib.WindowShouldClose()
@@ -34,6 +38,14 @@ function main()
         NanoVG.frame(width, height, dpi.x)
         # draw stuff
         Demo.draw(width, height, time.elapsed, mouse)
+
+        render(fpsGraph, 5, 5)
+        render(cpuGraph, 5 + 200 + 5, 5)
+
+        cpuTime = 1e-9 * time_ns() - time.now
+        update!(fpsGraph, time.frametime)
+        update!(cpuGraph, cpuTime)
+
         # render the frame
         NanoVG.render()
         Raylib.EndDrawing()

@@ -1,9 +1,12 @@
-using NanoVG
 using CSFML
 using CSFML.LibCSFML
 
+using NanoVG
+using Printf
+
 include("../utils.jl")
 include("../demo.jl")
+include("../perf.jl")
 
 const settings = Demo.settings
 
@@ -34,6 +37,9 @@ function main()
     time = TimeInfo()
     running = true
 
+    fpsGraph = PerfGraph(GRAPH_RENDER_FPS, "Frame Time")
+    cpuGraph = PerfGraph(GRAPH_RENDER_MS,  "CPU Time")
+
     while running
         # process events
         while Bool(sfWindow_pollEvent(window, event))
@@ -55,6 +61,14 @@ function main()
         NanoVG.frame(size.x, size.y, 1.0f0)
         # Draw stuff
         Demo.draw(size.x, size.y, time.elapsed, mouse)
+
+        render(fpsGraph, 5, 5)
+        render(cpuGraph, 5 + 200 + 5, 5)
+
+        cpuTime = 1e-9 * time_ns() - time.now
+        update!(fpsGraph, time.frametime)
+        update!(cpuGraph, cpuTime)
+
         # render the frame
         NanoVG.render()
         # update the window
