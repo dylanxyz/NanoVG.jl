@@ -11,4 +11,5 @@ NanoVG_jll = "38a0872c-fafd-5507-99b7-5cae04c321c8"
 
 [compat]
 ColorTypes = "0.11"
+CEnum = "0.4"
 julia = "1.6"
