@@ -39,6 +39,9 @@ jobs:
           import CompatHelper
           CompatHelper.main()
         shell: julia --color=yes {0}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMPATHELPER_PRIV: ${{ secrets.DOCUMENTER_KEY }}
       - name: "Run CompatHelper for LibNanoVG"
         run: |
           import CompatHelper
