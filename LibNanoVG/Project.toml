@@ -10,4 +10,5 @@ GLEW_jll = "bde7f898-03f7-559e-8810-194d950ce600"
 NanoVG_jll = "38a0872c-fafd-5507-99b7-5cae04c321c8"
 
 [compat]
+ColorTypes = "0.11"
 julia = "1.6"
