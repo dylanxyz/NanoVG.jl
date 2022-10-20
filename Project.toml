@@ -9,6 +9,7 @@ LibNanoVG = "7e2db94e-98cb-4b2e-907e-9710ad85db91"
 ModernGL = "66fc600b-dfda-50eb-8b99-91cfa97b1301"
 
 [compat]
+ColorTypes = "0.11"
 ModernGL = "1"
 julia = "1"
 
