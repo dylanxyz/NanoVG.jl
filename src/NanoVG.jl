@@ -132,7 +132,7 @@ end
 renderer() = renderer(context().renderer)
 
 """
-    create(opengl[; antialiasing = false]) -> NvgContext
+    create(opengl[; antialiasing = false]) -> Context
 
 Creates a new NanoVG context.
 
