@@ -40,7 +40,7 @@ export transformation
 
 export save
 export restore
-export resetsyle
+export reset_style
 export scissor
 export clip
 export antialias

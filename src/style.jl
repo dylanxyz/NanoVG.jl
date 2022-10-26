@@ -23,11 +23,11 @@ See also [`save`](@ref).
 restore() = nvgRestore(@vg)
 
 """
-    reset() -> Nothing
+    reset_style() -> Nothing
 
 Resets current render state to default values. Does not affect the render state stack.
 """
-resetsyle() = nvgReset(@vg)
+reset_style() = nvgReset(@vg)
 
 # --------------------- Scissoring --------------------- #
 
