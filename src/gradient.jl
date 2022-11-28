@@ -8,7 +8,7 @@ start and end coordinates of the linear gradient, `icol` specifies the
 start color and `ocol` the end color.
 
 The gradient is transformed by the current transform when it is passed
-to [`setfill`](@ref) or [`setstroke`](@ref).
+to [`fillcolor`](@ref) or [`strokecolor`](@ref).
 """
 struct LinearGradient <: Gradient
     paint::NVGpaint
@@ -25,7 +25,7 @@ corner radius, and `f` feather. Feather defines how blurry the border of the rec
 Parameter `icol` specifies the inner color and `ocol` the outer color of the gradient.
 
 The gradient is transformed by the current transform when it is passed to
-[`setfill`](@ref) or [`setstroke`](@ref).
+[`fillcolor`](@ref) or [`strokecolor`](@ref).
 """
 struct BoxGradient <: Gradient
     paint::NVGpaint
@@ -39,7 +39,7 @@ Creates a radial gradient. Parameters `(cx, cy)` specify the center,
 `icol` specifies the start color and `ocol` the end color.
 
 The gradient is transformed by the current transform when it is passed to
-[`setfill`](@ref) or [`setstroke`](@ref).
+[`fillcolor`](@ref) or [`strokecolor`](@ref).
 """
 struct RadialGradient <: Gradient
     paint::NVGpaint
