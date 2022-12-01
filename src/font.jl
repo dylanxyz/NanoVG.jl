@@ -220,6 +220,7 @@ end
 
 """
     breaklines(text, width)
+    breaklines(f, text, width)
 
 Breaks the specified text into lines, returning a [`TextRows`](@ref) object that can be used to iterate
 each lines with a [`TextRow`](@ref).
@@ -229,26 +230,37 @@ or when new-line characters are encountered.
 
 Words longer than the max width are slit at nearest character (i.e. no hyphenation).
 
+A function `f` can be passed as the first argument, in that case, `f` will be called for every
+line with a [`TextRow`](@ref) and the current line number.
+
 # Example
 
+Using a for loop:
+
 ```julia
-mytext = \"\"\"
-Cillum aliquip commodo anim nulla laboris aliquip proident dolor.
-Reprehenderit magna tempor labore ipsum officia.
-\"\"\"
-
-spacing = 32
-
-for row in breaklines(mytext, 800)
-    x, y = 20, row.line * spacing
+for row in breaklines(mytext, 400)
+    x, y = 20, row.line * 32
     text(row.text, x, y)
 end
+```
 
+Using an anonymous function:
 
+```julia
+breaklines(mytext, 400) do row, i
+    x, y = 20, i * 32
+    text(row.text, x, y)
+end
 ```
 """
 function breaklines(text::AbstractString, width::Real)
     return TextRows(text, width)
+end
+
+function breaklines(f, text::AbstractString, width::Real)
+    for row in TextRows(text, width)
+        f(row, row.line)
+    end
 end
 
 """
