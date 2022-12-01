@@ -17,13 +17,15 @@ Represents a text row that is used by [`breaklines`](@ref).
 
 # Fields
 
++ `line` is the line of the row.
 + `text` is the text of the row.
 + `width` is the logical width of the row.
-+ `xmin` and `xmax` represents the bounds of the row.
++ `xmin` and `xmax` are the bounds of the row.
 
 Logical `width` and bounds can differ because of kerning and some parts over extending.
 """
 struct TextRow
+    line ::Cint
     text ::String
     width::Float32
     xmin ::Float32
@@ -67,8 +69,26 @@ mutable struct TextBounds
     TextBounds(args...) = new(args...)
 end
 
+mutable struct TextRows
+    rows::Vector{NVGtextRow}
+    nrows::Cint
+    width::Cint
+    text::String
+    start::Cstring
+end
+
+function TextRows(text::AbstractString, width::Real)
+    rows = Vector{NVGtextRow}(undef, 1)
+    start = Cstring(pointer(text))
+    return TextRows(rows, 0, width, text, start)
+end
+
 function Base.unsafe_convert(::Type{Ptr{Float32}}, it::TextBounds)
     return convert(Ptr{Float32}, pointer_from_objref(it))
+end
+
+function Base.size(bounds::TextBounds)
+    bounds.xmax - bounds.xmin, bounds.ymax - bounds.ymin
 end
 
 """
@@ -179,39 +199,56 @@ function textbounds(text::AbstractString, x::Real, y::Real, width::Real)
     return bounds
 end
 
+Base.eltype(::TextRows) = TextRow
+
+function Base.iterate(it::TextRows, line = 1)
+    it.nrows = nvgTextBreakLines(@vg, it.start, C_NULL, it.width, it.rows, 1)
+
+    if it.nrows > 0
+        row = it.rows[1]
+        len = max(pointer(row._end) - pointer(row.start), 0)
+        str = unsafe_string(pointer(row.start), len)
+        it.start = row.next
+        return TextRow(line, str, row.width, row.minx, row.maxx), line + 1
+    else
+        it.nrows = 0
+        it.rows  = Vector{NVGtextRow}(undef, 1)
+        it.start = Cstring(pointer(it.text))
+        return nothing
+    end
+end
+
 """
-    breaklines(f, text, width, [maxrows])
+    breaklines(text, width)
 
-Breaks the specified text into lines, then call `f` for each line.
-
-The `f` function accepts 2 arguments: a [`TextRow`](@ref) and the current line position.
+Breaks the specified text into lines, returning a [`TextRows`](@ref) object that can be used to iterate
+each lines with a [`TextRow`](@ref).
 
 White space is stripped at the beginning of the rows, the text is split at word boundaries
 or when new-line characters are encountered.
 
 Words longer than the max width are slit at nearest character (i.e. no hyphenation).
-"""
-function breaklines(f::Function, text::AbstractString, width::Real, maxrows::Integer)
-    rows = Vector{NVGtextRow}(undef, maxrows)
-    start = text
-    line = 1
 
-    while (nrows = nvgTextBreakLines(@vg, start, C_NULL, width, rows, maxrows); nrows != 0)
-        for i in 1:nrows
-            row = rows[i]
-            len = max(pointer(row._end) - pointer(row.start), 0)
-            str = unsafe_string(pointer(row.start), len)
-            textRow = TextRow(str, row.width, row.minx, row.maxx)
-            f(textRow, line)
-            line += 1
-        end
+# Example
 
-        start = rows[nrows].next
-    end
+```julia
+mytext = \"\"\"
+Cillum aliquip commodo anim nulla laboris aliquip proident dolor.
+Reprehenderit magna tempor labore ipsum officia.
+\"\"\"
+
+spacing = 32
+
+for row in breaklines(mytext, 800)
+    x, y = 20, row.line * spacing
+    text(row.text, x, y)
 end
 
-function breaklines(f::Function, text::AbstractString, width::Real)
-    breaklines(f, text, width, count(==('\n'), text))
+
+```
+"""
+function breaklines(text::AbstractString, width::Real)
+    return TextRows(text, width)
 end
 
 """

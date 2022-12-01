@@ -627,7 +627,7 @@ function drawParagraph(x, y, width, height, mx, my)
         textalign(:left, :top)
         lineh = textmetrics().lineheight
 
-        breaklines(txt, width, 3) do row, i
+        for row in breaklines(txt, width)
             hit = mx > x && mx < (x + width) && my >= y && my < (y + lineh)
 
             fillcolor(rgba(255, hit ? 64 : 16))
