@@ -1,34 +1,31 @@
-module Demo
-
-using NanoVG
+using Tela
 using Colors
+using NanoVG
 
 import NanoVG: Image
-import ..@asset
-import ..@asset_str
 
-const settings = (
-    title  = "NanoVG Demo",
-    width  = 1000,
-    height = 600,
-    vsync  = false,
-)
+include("perf.jl")
 
-const images = Image[]
+setting"title"  = "NanoVG Demo"
+setting"width"  = 1000
+setting"height" = 600
+setting"vsync"  = false
+
+const images = Vector{Image}(undef, 12)
 
 const icons = (
-    search=Char(0x1F50D) |> string,
-    check=Char(0x2713) |> string,
-    login=Char(0xE740) |> string,
-    trash=Char(0xE729) |> string,
-    chevronRight=Char(0xE75E) |> string,
-    circledCross=Char(0x2716) |> string,
+    search       = string(Char(0x1F50D)),
+    check        = "\u2713",
+    login        = "\uE740",
+    trash        = "\uE729",
+    chevronRight = "\uE75E",
+    circledCross = "\u2716",
 )
 
 isblack(col::Colorant) = red(col) == green(col) == blue(col) == 0
 iswhite(col::Colorant) = red(col) == green(col) == blue(col) == 1
 
-function drawWindow(title, x, y, w, h)
+function draw_window(title, x, y, w, h)
     cornerRadius = 3.0
 
     @layer begin
@@ -66,7 +63,7 @@ function drawWindow(title, x, y, w, h)
     end
 end
 
-function drawSearchBox(txt, x, y, w, h)
+function draw_search_box(txt, x, y, w, h)
     cornerRadius = h / 2 - 1
     bg = BoxGradient(x, y + 1.5, w, h, h / 2, 5, rgba(0, 16), rgba(0, 92))
 
@@ -93,7 +90,7 @@ function drawSearchBox(txt, x, y, w, h)
     text(icons.circledCross, x + w - 0.55h, y + 0.55h)
 end
 
-function drawDropDown(txt, x, y, w, h)
+function draw_dropdown(txt, x, y, w, h)
     cornerRadius = 4
     bg = LinearGradient(x, y, x, y + h, rgba(255, 16), rgba(0, 16))
     fillcolor(bg)
@@ -115,7 +112,7 @@ function drawDropDown(txt, x, y, w, h)
     text(icons.chevronRight, x + w - 0.5h, y + 0.5h)
 end
 
-function drawLabel(label, x, y, w, h)
+function draw_label(label, x, y, w, h)
     fontsize(15)
     fontface("sans")
     fillcolor(rgba(255, 128))
@@ -124,7 +121,7 @@ function drawLabel(label, x, y, w, h)
     text(label, x, y + 0.5h)
 end
 
-function drawEditBoxBase(x, y, w, h)
+function draw_edit_boxbase(x, y, w, h)
     bg = BoxGradient(x + 1, y + 1 + 1.5, w - 2, h - 2, 3, 4, rgba(255, 32), rgba(32))
     fillcolor(bg)
     rrect(x + 1, y + 1, w - 2, h - 2, 4 - 1, :fill)
@@ -133,8 +130,8 @@ function drawEditBoxBase(x, y, w, h)
     rrect(x + 0.5, y + 0.5, w - 1, h - 1, 4 - 0.5, :stroke)
 end
 
-function drawEditBox(txt, x, y, w, h)
-    drawEditBoxBase(x, y, w, h)
+function draw_edit_box(txt, x, y, w, h)
+    draw_edit_boxbase(x, y, w, h)
 
     fontsize(17)
     fontface("sans")
@@ -143,8 +140,8 @@ function drawEditBox(txt, x, y, w, h)
     text(txt, x + 0.3h, y + 0.5h)
 end
 
-function drawEditBoxNum(txt, units, x, y, w, h)
-    drawEditBoxBase(x, y, w, h)
+function draw_edit_box_num(txt, units, x, y, w, h)
+    draw_edit_boxbase(x, y, w, h)
 
     uw = textbounds(units, 0, 0).next
 
@@ -161,7 +158,7 @@ function drawEditBoxNum(txt, units, x, y, w, h)
     text(txt, x + w - uw - 0.5h, y + 0.5h)
 end
 
-function drawCheckBox(txt, x, y, w, h)
+function draw_checkbox(txt, x, y, w, h)
     fontsize(15)
     fontface("sans")
     fillcolor(rgba(255, 160))
@@ -172,13 +169,13 @@ function drawCheckBox(txt, x, y, w, h)
     rrect(x + 1, y + floor(0.5h) - 9, 18, 18, 3, :fill)
 
     fontsize(33)
-    fontface("sans")
+    fontface("icons")
     fillcolor(rgba(255, 128))
     textalign(:center, :middle)
     text(icons.check, x + 9 + 2, y + 0.5h)
 end
 
-function drawButton(preicon, txt, x, y, w, h, col)
+function draw_button(preicon, txt, x, y, w, h, col)
     a = isblack(col) ? 16 : 32
     cornerRadius = 4
     bg = LinearGradient(x, y, x, y + h, rgba(255, a), rgba(0, a))
@@ -219,7 +216,7 @@ function drawButton(preicon, txt, x, y, w, h, col)
     text(txt, x + 0.5w - 0.5tw + 0.25iw, y + 0.5h - 1)
 end
 
-function drawSlider(pos, x, y, w, h)
+function draw_slider(pos, x, y, w, h)
     cy = y + floor(0.5h)
     kr = floor(0.25h)
 
@@ -250,8 +247,7 @@ function drawSlider(pos, x, y, w, h)
     end # @layer
 end
 
-
-function drawEyes(x, y, w, h, mx, my, t)
+function draw_eyes(x, y, w, h, mx, my, t)
     ex = w * 0.23
     ey = h * 0.5
     lx = x + ex
@@ -300,7 +296,7 @@ function drawEyes(x, y, w, h, mx, my, t)
     ellipse(rx, ry, ex, ey, :fill)
 end
 
-function drawGraph(x, y, w, h, t)
+function draw_graph(x, y, w, h, t)
     dx = w / 5.0
 
     samples = [
@@ -364,7 +360,7 @@ function drawGraph(x, y, w, h, t)
     strokewidth(1)
 end
 
-function drawSpinner(cx, cy, r, t)
+function draw_spinner(cx, cy, r, t)
     a0 = 6t
     a1 = π + 6t
     r0 = r
@@ -386,7 +382,7 @@ function drawSpinner(cx, cy, r, t)
     end
 end
 
-function drawThumbnails(x, y, w, h, images, t)
+function draw_thumbnails(x, y, w, h, images, t)
     cornerRadius = 3
     thumb = 60
     arry = 30
@@ -440,7 +436,7 @@ function drawThumbnails(x, y, w, h, images, t)
                 v = i * dv
                 a = clamp((u2 - v) / dv, 0, 1)
                 if a < 1
-                    drawSpinner(tx + thumb / 2, ty + thumb / 2, 0.25thumb, t)
+                    draw_spinner(tx + thumb / 2, ty + thumb / 2, 0.25thumb, t)
                 end
 
                 imgPaint = pattern(img, tx + ix, ty + iy, iw, ih, alpha=a)
@@ -476,7 +472,7 @@ function drawThumbnails(x, y, w, h, images, t)
     end
 end
 
-function drawColorWheel(x, y, w, h, t)
+function draw_color_wheel(x, y, w, h, t)
     hue = sin(0.12t)
     ax, ay = 0.0, 0.0
     bx, by = 0.0, 0.0
@@ -562,7 +558,7 @@ function drawColorWheel(x, y, w, h, t)
     end
 end
 
-function drawLines(x, y, w, h, t)
+function draw_lines(x, y, w, h, t)
     pad = 5
     s = w / 9 - 2pad
     joins = (:miter, :round, :bevel)
@@ -611,7 +607,7 @@ function drawLines(x, y, w, h, t)
     end
 end
 
-function drawParagraph(x, y, width, height, mx, my)
+function draw_paragraph(x, y, width, height, mx, my)
     txt = "This is longer chunk of text.\n  \n  Would have used lorem ipsum but she    was busy jumping over the lazy dog with the fox and all the men who came to the aid of the party.🎉"
     hoverText = "Hover your mouse over the text to see calculated caret position."
     boxText = "Testing\nsome multiline\ntext."
@@ -714,7 +710,7 @@ function drawParagraph(x, y, width, height, mx, my)
     end
 end
 
-function drawWidths(x, y, width)
+function draw_widths(x, y, width)
     @layer begin
         strokecolor(rgba(0, 255))
         for i in 0:19
@@ -726,7 +722,7 @@ function drawWidths(x, y, width)
     end
 end
 
-function drawCaps(x, y, width)
+function draw_caps(x, y, width)
     caps = (:butt, :round, :square)
     lineWidth = 8
 
@@ -746,7 +742,7 @@ function drawCaps(x, y, width)
     end
 end
 
-function drawScissor(x, y, t)
+function draw_scissor(x, y, t)
     @layer begin
         translate(x, y)
         rotate(deg2rad(5))
@@ -769,77 +765,102 @@ function drawScissor(x, y, t)
     end
 end
 
-function setup()
+function setup(::App)
+    assets"images" = [joinpath(dirname(@__DIR__), "..", "assets", "images")]
+    assets"fonts"  = [joinpath(dirname(@__DIR__), "..", "assets", "fonts")]
+
     for i in 1:12
-        push!(images, Image(@asset "images/image$i.jpg"))
+        path = asset("images", "image$i.jpg")
+        images[i] = Image(path)
     end
 
-    fontIcons = loadfont("icons", asset"fonts/entypo.ttf")
-    fontNormal = loadfont("sans", asset"fonts/Roboto-Regular.ttf")
-    fontBold = loadfont("sans-bold", asset"fonts/Roboto-Bold.ttf")
-    fontEmoji = loadfont("emoji", asset"fonts/NotoEmoji-Regular.ttf")
-
-    fallbackfont(fontNormal, fontEmoji)
-    fallbackfont(fontBold, fontEmoji)
+    loadfont("icons", asset"fonts:entypo.ttf")
 end
 
-function draw(width, height, t, mouse)
-    mx, my = mouse
+function update(::App)
+    t = @seconds
+    mx, my = @mouse[x, y]
+    width, height = @width, @height
 
     background(RGB(0.3, 0.3, 0.32))
 
-    drawEyes(width - 250, 50, 150, 100, mx, my, t)
-    drawParagraph(width - 450, 50, 150, 100, mx, my)
-    drawGraph(0, height / 2, width, height / 2, t)
-    drawColorWheel(width - 300, height - 300, 250, 250, t)
+    draw_eyes(width - 250, 50, 150, 100, mx, my, t)
+    draw_paragraph(width - 450, 50, 150, 100, mx, my)
+    draw_graph(0, height / 2, width, height / 2, t)
+    draw_color_wheel(width - 300, height - 300, 250, 250, t)
 
     # Line joints
-    drawLines(120, height - 50, 600, 50, t)
+    draw_lines(120, height - 50, 600, 50, t)
     # Line caps
-    drawWidths(10, 50, 30)
+    draw_widths(10, 50, 30)
     # Line caps
-    drawCaps(10, 300, 30)
+    draw_caps(10, 300, 30)
 
-    drawScissor(50, height - 80, t)
+    draw_scissor(50, height - 80, t)
 
     @layer begin
         # Widgets
-        drawWindow("Widgets `n Stuff", 50, 50, 300, 400)
+        draw_window("Widgets `n Stuff", 50, 50, 300, 400)
         x, y = 60, 95
-        drawSearchBox("Search", x, y, 280, 25)
+        draw_search_box("Search", x, y, 280, 25)
         y += 40
-        drawDropDown("Effects", x, y, 280, 28)
+        draw_dropdown("Effects", x, y, 280, 28)
         popy = y + 14
         y += 45
 
         # Form
-        drawLabel("Login", x, y, 280, 20)
+        draw_label("Login", x, y, 280, 20)
         y += 25
-        drawEditBox("Email", x, y, 280, 28)
+        draw_edit_box("Email", x, y, 280, 28)
         y += 35
-        drawEditBox("Password", x, y, 280, 28)
+        draw_edit_box("Password", x, y, 280, 28)
         y += 38
-        drawCheckBox("Remember me", x, y, 140, 28)
-        drawButton(icons.login, "Sign in", x + 138, y, 140, 28, rgba(0, 96, 128, 255))
+        draw_checkbox("Remember me", x, y, 140, 28)
+        draw_button(icons.login, "Sign in", x + 138, y, 140, 28, rgba(0, 96, 128, 255))
         y += 45
 
         # Slider
-        drawLabel("Diameter", x, y, 280, 20)
+        draw_label("Diameter", x, y, 280, 20)
         y += 25
-        drawEditBoxNum("123.00", "px", x + 180, y, 100, 28)
-        drawSlider(0.4, x, y, 170, 28)
+        draw_edit_box_num("123.00", "px", x + 180, y, 100, 28)
+        draw_slider(0.4, x, y, 170, 28)
         y += 55
 
-        drawButton(icons.trash, "Delete", x, y, 160, 28, rgba(128, 16, 8, 255))
-        drawButton("", "Cancel", x + 170, y, 110, 28, rgba(0))
+        draw_button(icons.trash, "Delete", x, y, 160, 28, rgba(128, 16, 8, 255))
+        draw_button("", "Cancel", x + 170, y, 110, 28, rgba(0))
 
         # Thumbnails boxText
-        drawThumbnails(365, popy - 30, 160, 300, images, t)
+        draw_thumbnails(365, popy - 30, 160, 300, images, t)
     end
 end
 
-function dispose()
+function dispose(::App)
     foreach(delete, images)
 end
 
-end # module
+const Graphs = (;
+    fps = PerfGraph(GRAPH_RENDER_FPS, "Frame Time"),
+    cpu = PerfGraph(GRAPH_RENDER_MS, "CPU Time")
+)
+
+const now = Ref(time_ns())
+
+function before_update(::App)
+    now[] = time_ns()
+end
+
+function after_update(::App)
+    NanoVG.frame(Tela.wsize(@window)..., @window[scale])
+
+    render(Graphs.fps, 5, 5)
+    render(Graphs.cpu, 200 + 5, 5)
+
+    cpu_time = 1e-9 * (time_ns() - now[])
+
+    update!(Graphs.fps, @frametime)
+    update!(Graphs.cpu, cpu_time)
+
+    NanoVG.render()
+end
+
+Tela.@run()
