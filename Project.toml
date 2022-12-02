@@ -1,7 +1,7 @@
 name = "NanoVG"
 uuid = "c6e2bc90-135b-40df-be1e-4d6eac081f64"
 authors = ["Jorge Pereira <jorge.brito.xyz@gmail.com> and contributors"]
-version = "0.1.1"
+version = "0.1.12"
 
 [deps]
 ColorTypes = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
