@@ -7,9 +7,6 @@ Julia bindings for the [NanoVG](https://github.com/memononen/nanovg) drawing lib
 
 ## Screenshot
 
-The screenshot was made with the julia implementation of the
-NanoVG [demo](examples/demo.jl) example.
-
 ![NanoVG Demo](assets/screenshot.png)
 
 ## Installation
