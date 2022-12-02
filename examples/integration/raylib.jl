@@ -1,57 +1,38 @@
 using Raylib
 using NanoVG
-using Printf
 
-include("../utils.jl")
-include("../demo.jl")
-include("../perf.jl")
 
-const settings = Demo.settings
+function draw()
+    background(rgb(8))
 
-const config = let flags = 0
-    flags |= settings.vsync ? Raylib.FLAG_VSYNC_HINT : 0
-    flags |= Raylib.FLAG_WINDOW_RESIZABLE
-    flags |= Raylib.FLAG_MSAA_4X_HINT
+    elapsed = Raylib.GetTime()
+    mx, my = Raylib.GetMousePosition()
+    hue = 360 * (cos(π/12 * elapsed) + 1)
+
+    fillcolor(hsl(hue, 0.75, 0.65))
+    circle(mx, my, 64.0, :fill)
 end
 
 function main()
-    Raylib.SetConfigFlags(config)
-    Raylib.InitWindow(settings.width, settings.height, settings.title)
+    Raylib.InitWindow(800, 600, "NanoVG && Raylib")
     # create a NanoVG context
     NanoVG.create(NanoVG.GL3)
 
-    Demo.setup()
-
-    fpsGraph = PerfGraph(GRAPH_RENDER_FPS, "Frame Time")
-    cpuGraph = PerfGraph(GRAPH_RENDER_MS,  "CPU Time")
-    time = TimeInfo()
-
     while !Raylib.WindowShouldClose()
-        update!(time)
-
         Raylib.BeginDrawing()
         dpi = Raylib.GetWindowScaleDPI()
-        mouse = Raylib.GetMousePosition()
         width = Raylib.GetScreenWidth()
         height = Raylib.GetScreenHeight()
+
         # create a new frame
         NanoVG.frame(width, height, dpi.x)
-        # draw stuff
-        Demo.draw(width, height, time.elapsed, mouse)
-
-        render(fpsGraph, 5, 5)
-        render(cpuGraph, 5 + 200 + 5, 5)
-
-        cpuTime = 1e-9 * time_ns() - time.now
-        update!(fpsGraph, time.frametime)
-        update!(cpuGraph, cpuTime)
-
+        # drawing functions should be called here
+        draw()
         # render the frame
         NanoVG.render()
         Raylib.EndDrawing()
     end
 
-    Demo.dispose()
     # Deletes the NanoVG context
     NanoVG.dispose()
     Raylib.CloseWindow()

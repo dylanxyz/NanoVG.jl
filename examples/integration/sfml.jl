@@ -1,17 +1,23 @@
+using NanoVG
 using CSFML
 using CSFML.LibCSFML
 
-using NanoVG
-using Printf
+const clock = sfClock_create()
 
-include("../utils.jl")
-include("../demo.jl")
-include("../perf.jl")
+function draw(window)
+    background(rgb(8))
 
-const settings = Demo.settings
+    time = sfClock_getElapsedTime(clock)
+    elapsed = sfTime_asSeconds(time)
+    mouse = sfMouse_getPosition(window)
+    hue = 360 * (cos(π/12 * elapsed) + 1)
+
+    fillcolor(hsl(hue, 0.75, 0.65))
+    circle(mouse.x, mouse.y, 64.0, :fill)
+end
 
 function main()
-    mode = sfVideoMode(settings.width, settings.height, 32)
+    mode = sfVideoMode(800, 600, 32)
 
     winSettings = Ref(sfContextSettings(
         24, #= depthBits =#
@@ -23,22 +29,16 @@ function main()
         0, #= sRgbCapable =#
     ))
 
-    window = sfWindow_create(mode, settings.title, sfResize | sfClose, winSettings)
+    window = sfWindow_create(mode, "NanoVG && SFML", sfResize | sfClose, winSettings)
     @assert window != C_NULL "Could not create a SFML window 😥"
 
     sfWindow_setActive(window, true)
-    sfWindow_setVerticalSyncEnabled(window, settings.vsync)
 
     # create a NanoVG context
     NanoVG.create(NanoVG.GL3)
-    Demo.setup()
 
     event = Ref{sfEvent}()
-    time = TimeInfo()
     running = true
-
-    fpsGraph = PerfGraph(GRAPH_RENDER_FPS, "Frame Time")
-    cpuGraph = PerfGraph(GRAPH_RENDER_MS,  "CPU Time")
 
     while running
         # process events
@@ -49,33 +49,19 @@ function main()
                 sfWindow_close(window)
             end
         end
-        # mouse position
-        mouse = let pos = sfMouse_getPosition(window)
-            pos.x, pos.y
-        end
-        # update time
-        update!(time)
+
         # get the window size
         size = sfWindow_getSize(window)
         # create a new frame
         NanoVG.frame(size.x, size.y, 1.0f0)
-        # Draw stuff
-        Demo.draw(size.x, size.y, time.elapsed, mouse)
-
-        render(fpsGraph, 5, 5)
-        render(cpuGraph, 5 + 200 + 5, 5)
-
-        cpuTime = 1e-9 * time_ns() - time.now
-        update!(fpsGraph, time.frametime)
-        update!(cpuGraph, cpuTime)
-
+        # drawing functions should be called here
+        draw(window)
         # render the frame
         NanoVG.render()
         # update the window
         sfWindow_display(window)
     end
 
-    Demo.dispose()
     NanoVG.dispose()
     sfWindow_destroy(window)
 end
