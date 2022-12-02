@@ -10,7 +10,7 @@ Julia bindings for the [NanoVG](https://github.com/memononen/nanovg) drawing lib
 The screenshot was made with the julia implementation of the
 NanoVG [demo](examples/demo.jl) example.
 
-![NanoVG Demo](examples/screenshot.png)
+![NanoVG Demo](assets/screenshot.png)
 
 ## Installation
 
@@ -48,7 +48,7 @@ function main()
    height = 600
 
    window = GLFW.CreateWindow(width, height, title)
-   @assert window != C_NULL "Could not create a GLFW window 😢"
+   @assert window.handle != C_NULL "Could not create a GLFW window 😢"
 
    GLFW.MakeContextCurrent(window)
 
