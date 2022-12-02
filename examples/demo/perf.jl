@@ -1,7 +1,6 @@
 @enum GraphRenderStyle begin
     GRAPH_RENDER_FPS
     GRAPH_RENDER_MS
-    GRAPH_RENDER_PERCENT
 end
 
 const GRAPH_HISTORY_COUNT = 100
@@ -85,20 +84,13 @@ function render(fps::PerfGraph, x::Real, y::Real)
 
     beginpath()
     moveto(x, y + h)
+
     if fps.style == GRAPH_RENDER_FPS
         for i in 0:GRAPH_HISTORY_COUNT - 1
             v = 1.0 / (0.00001 + fps.values[((fps.head + i) % GRAPH_HISTORY_COUNT) + 1])
             v = v <= 80 ? v : 80
             vx = x + (i / (GRAPH_HISTORY_COUNT - 1)) * w
             vy = y + h - ((v / 80) * h)
-            lineto(vx, vy)
-        end
-    elseif fps.style == GRAPH_RENDER_PERCENT
-        for i in 0:GRAPH_HISTORY_COUNT - 1
-            v = fps.values[((fps.head + i) % GRAPH_HISTORY_COUNT) + 1]
-            v = v <= 100 ? v : 100
-            vx = x + (i / (GRAPH_HISTORY_COUNT - 1)) * w
-            vy = y + h - ((v / 100) * h)
             lineto(vx, vy)
         end
     else
@@ -128,25 +120,19 @@ function render(fps::PerfGraph, x::Real, y::Real)
         fontsize(15)
         textalign(:right, :top)
         fillcolor(rgba(240, 240, 240, 255))
-        str = printf("%.2f FPS", 1.0 / avg)
+        str = string(round(1.0 / avg, digits=2), " FPS")
         text(str, x + w - 3, y + 3)
 
         fontsize(13.0)
 		textalign(:right, :baseline)
 		fillcolor(rgba(240, 240, 240, 160))
-        str = printf("%.2f ms", avg * 1000.0)
+        str = string(round(1000avg, digits=2), " ms")
 		text(str, x + w - 3, y + h - 3)
-    elseif fps.style == GRAPH_RENDER_PERCENT
-        fontsize(15.0)
-		textalign(:right, :top)
-		fillcolor(rgba(240, 240, 240, 255))
-		str = printf("%.1f %%", avg)
-		text(str, x + w - 3, y + 3)
     else
         fontsize(15.0)
 		textalign(:right, :top)
 		fillcolor(rgba(240, 240, 240, 255))
-		str = printf("%.2f ms", avg * 1000)
+        str = string(round(1000 * avg, digits=2), " ms")
 		text(str, x + w - 3, y + 3)
     end
 end
