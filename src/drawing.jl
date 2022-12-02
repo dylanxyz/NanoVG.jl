@@ -260,6 +260,14 @@ function rect(x::Real, y::Real, width::Real, height::Real, action)
     rect(x, y, width, height; action)
 end
 
+function rect(bounds::TextBounds; action=:path)
+    rect(bounds.xmin, bounds.xmax, size(bounds)...; action)
+end
+
+function rect(bounds::TextBounds, action)
+    rect(bounds; action)
+end
+
 """
     rrect(x, y, width, height, radii::NTuple{4}; action=:path)
     rrect(x, y, width, height, radii::NTuple{4}, action)
@@ -293,18 +301,62 @@ function rrect(x::Real, y::Real, width::Real, height::Real, radii::NTuple{4,<:Re
     rrect(x, y, width, height, radii; action)
 end
 
+function rrect(bounds::TextBounds, radii; action=:path)
+    rrect(bounds.xmin, bounds.xmax, size(bounds)..., radii; action)
+end
+
+function rrect(bounds::TextBounds, radii, action)
+    rrect(bounds, radii; action)
+end
+
+"""
+    box(x, y, width, height; radii=0, action=:path)
+    box(x, y, width, height, action; radii=0)
+
+Draws a rectangular shaped *box* centered at `x, y` with dimensions `width × height` and optinally
+with corner radius `radii`.
+
+As for [`rrect`](@ref), `radii` can be either a single number, defining the radius for all corners,
+or a tuple of 4 numbers, defining the radius for each corner, in the order
+`(top-left, top-right, bottom-right, bottom-left)`.
+"""
 function box(x::Real, y::Real, width::Real, height::Real; radii=0, action=:path)
-    x = x - width / 2
-    y = y - height / 2
-    if radii == 0
-        rect(x, y, width, height; action)
-    else
-        rrect(x, y, width, height, radii; action)
+    let x = x - width / 2, y = y - height / 2
+        if radii == 0
+            rect(x, y, width, height; action)
+        else
+            rrect(x, y, width, height, radii; action)
+        end
     end
 end
 
 function box(x::Real, y::Real, width::Real, height::Real, action; radii=0)
     box(x, y, width, height; action, radii)
+end
+
+function box(bounds::TextBounds, padding::NTuple{4, <:Real}, radii; action=:path)
+    (top, left, bottom, right) = padding
+    x = bounds.xmin - left
+    y = bounds.ymin - top
+    w, h = size(bounds) .+ (right, bottom)
+    rrect(x, y, w, h, radii, action)
+end
+
+function box(bounds::TextBounds, padding::NTuple{2, <:Real}, radii; action=:path)
+    (px, py) = padding
+    box(bounds, (py, px, py, px), radii; action)
+end
+
+function box(bounds::TextBounds, padding::Real, radii; action=:path)
+    box(bounds, (padding, padding, padding, padding), radii; action)
+end
+
+function box(bounds::TextBounds; radii=0, padding=0, action=:path)
+    box(bounds, padding, radii; action)
+end
+
+function box(bounds::TextBounds, action; radii=0, padding=0)
+    box(bounds, padding; radii, padding, action)
 end
 
 """
@@ -389,7 +441,7 @@ end
     text(text, x, y)
     text(text, x, y, width)
 
-Draws `text` string at position `(x, y)`.
+Draws `text` string at position `x, y`.
 
 The optional `width` parameter determines the width of the text box where the text should be drawn.
 """
@@ -399,4 +451,30 @@ end
 
 function text(text::AbstractString, x::Real, y::Real, width::Real)
     nvgTextBox(@vg, Cfloat(x), Cfloat(y), Cfloat(width), string(text), C_NULL)
+end
+
+"""
+    paragraph(text, x, y [, width])
+
+Draws `text` at `x, y`, with optinal text row `width`.
+
+`paragraph` behaves like [`text`](@ref), but that it can support text with line breaks.
+"""
+function paragraph(text::AbstractString, x::Real, y::Real, width::Real = Inf32)
+    lh = textmetrics().lineheight
+    for row in breaklines(text, width)
+        NanoVG.text(row.text, x, y)
+        y += lh
+    end
+end
+
+function poly(points::Vector{<:AbstractVector{<:Real}}; action=:path)
+    beginpath(action)
+    moveto(first(points)...)
+
+    for i in (firstindex(points) + 1):lastindex(points)
+        lineto(points[i]...)
+    end
+
+    doaction(action)
 end
