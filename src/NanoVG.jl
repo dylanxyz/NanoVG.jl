@@ -60,27 +60,29 @@ export lineheight
 export textspacing
 export textalign
 
-export beginpath
-export fillpath
-export strokepath
-export fillstroke
-export closepath
-export winding
-export moveto
-export lineto
-export line
-export cubic
-export quadratic
 export arc
 export arcto
+export beginpath
+export box
+export circle
+export closepath
+export cubic
+export ellipse
+export fillpath
+export fillstroke
+export image
+export line
+export lineto
+export moveto
+export paragraph
+export poly
+export quadratic
 export rect
 export rrect
-export ellipse
-export circle
 export square
-export image
+export strokepath
 export text
-export poly
+export winding
 
 const Maybe{T} = Union{T, Nothing}
 const Pointer{T} = Union{AbstractArray{T}, Ptr{T}}
