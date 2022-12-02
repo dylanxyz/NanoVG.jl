@@ -1,2 +1,5 @@
 /Manifest.toml
 LibNanoVG/Manifest.toml
+
+examples/**/Manifest.toml
+examples/**/Project.toml
