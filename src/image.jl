@@ -3,7 +3,7 @@ import Base: read
 
 """
     Image(filename, attributes...) -> Image
-    Image(data, attrs...) -> Image
+    Image(data, attributes...) -> Image
     Image(width, height, data, attrs...) -> Image
 
 Creates `image` by loading it from the disk from specified file name or from memory.
@@ -19,13 +19,20 @@ You can pass additional `attributes`:
 """
 struct Image
     id::Cint
+    tex::GLuint
     width::Int
     height::Int
+end
+
+function Image(id::Cint, width::Integer, height::Integer)
+    tex = nvgGetTextureId(@vg, id)
+    return Image(id, tex, width, height)
 end
 
 function Image(filename::AbstractString, attrs::Symbol...)
     id = nvgCreateImage(@vg, filename, imgflags(attrs))
     @assert id != 0 "Failed to load image from file $filename"
+
     return Image(id, imgsize(id)...)
 end
 
